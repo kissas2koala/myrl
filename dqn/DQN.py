@@ -1,0 +1,125 @@
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+
+
+"""
+    DQN and DoubleDQN
+"""
+
+import math
+import torch as th
+import torch.nn as nn
+import numpy as np
+
+from config import logger, GPU_CONFIG
+from dqn.memo import ReplayMemory, Experience
+from dqn.model import DQNModel
+
+
+class DQN:
+    def __init__(self, dim_obs, dim_act, lr, gamma, eps_high, eps_low, eps_decay, 
+                 batch_size, target_replace, capacity):
+        self.n_obs = dim_obs
+        self.n_actions = dim_act
+
+        self.lr = lr
+        self.gamma = gamma
+        self.capacity = capacity
+        self.batch_size = batch_size
+        self.epsilon = 0.
+        self.eps_high = eps_high
+        self.eps_low = eps_low
+        self.eps_decay = eps_decay
+        self.memory = ReplayMemory(capacity)
+        self.target_replace = target_replace
+        self.scale_reward = 1
+
+        self.use_cuda = GPU_CONFIG.use_cuda
+        self.total_cnt = 0
+        self.learn_cnt = 0
+
+        self.policy_net, self.target_net = DQNModel(self.n_obs, self.n_actions), DQNModel(self.n_obs, self.n_actions)
+        # self.target_net = DQNModel(n_states, n_actions).to('gpu')  # 方法二
+        if self.use_cuda:
+            logger.info('GPU Available')
+            self.policy_net = self.policy_net.cuda()
+            self.target_net = self.target_net.cuda()
+        self.target_net.load_state_dict(self.policy_net.state_dict())
+        self.loss_func = nn.MSELoss()
+        self.optimizer = th.optim.Adam(self.policy_net.parameters(), lr=self.lr)
+
+        self.FloatTensor = th.cuda.FloatTensor if self.use_cuda else th.FloatTensor
+        self.LongTensor = th.cuda.LongTensor if self.use_cuda else th.LongTensor
+
+    def learn(self):
+        # check to replace target parameters
+        # if self.learn_cnt % self.target_replace == 0:
+        #     self.target_net.load_state_dict(self.policy_net.state_dict())
+        #     logger.debug('target_params_replaced')
+        #     learn_cnt_str = '%09d' % self.learn_cnt
+        #     th.save(self.target_net.state_dict(), 'model/dqn/model_' + learn_cnt_str + '.pkl')
+        # self.learn_cnt += 1
+
+        # sample batch from all memory
+        transitions = self.memory.sample(self.batch_size)
+        batch = Experience(*zip(*transitions))  # class(list)
+        obs_batch = self.FloatTensor(np.array(batch.obs))  # torch.Size([32, 4])
+        # obs_batch = th.tensor(obs_batch, device=self.device, dtype=th.float)  # 方法二
+        logger.debug("obs_batch: {}".format(obs_batch.shape))
+        action_batch = self.LongTensor(np.array(batch.action))  # (batch, 1)
+        logger.debug('action batch: {}'.format(action_batch.shape))
+        reward_batch = self.FloatTensor(np.array(batch.reward)).view(self.batch_size, 1)  # (batch, 1)
+        logger.debug('reward_batch: {}'.format(reward_batch.shape))
+        next_obs_batch = self.FloatTensor(np.array(batch.next_obs))
+        done_batch = self.FloatTensor(np.array(batch.done)).view(self.batch_size, 1)  # (batch, 1)
+        logger.debug('done_batch: {}'.format(done_batch))
+
+        # q_eval w.r.t the action in experience
+        q_eval = self.policy_net(obs_batch).gather(1, action_batch)  # shape (batch, 1)
+        logger.debug(q_eval.detach())
+        q_next = self.target_net(next_obs_batch).max(1)[0].detach()  # detach from graph, don't backpropagate
+        q_next = q_next.view(self.batch_size, 1)
+        q_target = self.scale_reward*reward_batch + self.gamma * q_next * (1-done_batch)  # shape (batch, 1)
+        loss = self.loss_func(q_eval, q_target)
+
+        self.optimizer.zero_grad()
+        loss.backward()
+        # clip grad
+        for param in self.policy_net.parameters():
+            param.grad.data.clamp_(-1, 1)
+        # nn.utils.clip_grad_norm_(self.policy_net.parameters(), 1) # 方法二
+        self.optimizer.step()
+
+        # loss
+        loss = loss.detach().cpu().numpy() if self.use_cuda else loss.detach().numpy()
+        logger.debug('loss: {}'.format(loss))
+        return loss
+
+    @th.no_grad()
+    def select_action(self, obs):
+        eps_high = self.eps_high
+        eps_low = self.eps_low
+        eps_decay = self.eps_decay
+        self.epsilon = eps_low + (eps_high - eps_low) * (math.exp(-1.0 * self.total_cnt / eps_decay))
+        self.total_cnt += 1
+        # if np.random.uniform() < self.epsilon:
+        if np.random.uniform() > self.epsilon:
+            obs = th.unsqueeze(self.FloatTensor(obs), 0)  # (batch, )
+            actions_value = self.policy_net(obs)
+            action = th.max(actions_value, 1)[1]
+            action = action.data.cpu() if self.use_cuda else action.detach()
+            action = action.numpy()
+        else:
+            action = np.zeros(1, dtype=np.int32)
+            action[0] = np.random.randint(0, self.n_actions)
+        return action
+
+
+class DoubleDQN(DQN):
+    def __init__(self, dim_obs, dim_act, lr, gamma, eps_high, eps_low, eps_decay,
+                 batch_size, target_replace, capacity):
+        super(DoubleDQN, self).__init__(dim_obs, dim_act, lr, gamma, eps_high, eps_low, eps_decay,
+                                        batch_size, target_replace, capacity)
+
+    def learn(self):
+        pass
