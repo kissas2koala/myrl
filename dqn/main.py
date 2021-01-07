@@ -9,7 +9,7 @@ import gym
 
 from dqn.DQN import DQN
 from config import logger, IS_TEST
-from utils import reward_w, loss_w
+from utils import file_w
 
 
 def get_params():
@@ -17,9 +17,9 @@ def get_params():
     parser.add_argument("--train", default=1, type=int)  # 1 表示训练，0表示只进行eval
     parser.add_argument("--gamma", default=0.99, type=float)
     parser.add_argument("--eps_high", default=0.95, type=float)  # 基于贪心选择action对应的参数epsilon
-    parser.add_argument("--eps_low", default=0.01, type=float)
+    parser.add_argument("--eps_low", default=0.001, type=float)
     parser.add_argument("--eps_decay", default=500, type=float)
-    parser.add_argument("--policy_lr", default=0.001, type=float)
+    parser.add_argument("--policy_lr", default=0.01, type=float)
     parser.add_argument("--memory_capacity", default=1000, type=int, help="capacity of Replay Memory")
     parser.add_argument("--is_ddqn", default=False, type=bool, help="Double DQN")
 
@@ -53,7 +53,10 @@ def main(params):
              is_ddqn=params.is_ddqn)
 
     # execution
-    moving_average_reward = 0
+    total_rewards = []
+    moving_average_rewards = []
+    moving_average_reward = 0.0
+    loss_list = []
     total_cnt = 0
     for i_episode in range(1, params.train_eps + 1):
         step_cnt = 0
@@ -73,7 +76,7 @@ def main(params):
 
             if total_cnt > params.batch_size:
                 loss = RL.learn()
-                if not IS_TEST: loss_w(loss, 'loss.txt')
+                loss_list.append(loss)
 
             if done:
                 break
@@ -84,11 +87,14 @@ def main(params):
             RL.target_net.load_state_dict(RL.policy_net.state_dict())
 
         moving_average_reward = total_reward if i_episode == 1 else moving_average_reward * 0.9 + total_reward * 0.1
+        moving_average_rewards.append(moving_average_reward)
+        total_rewards.append(total_reward)
         logger.info('episode:{}, reward:{}, e_greedy:{:.2f}, step:{}'.
                     format(i_episode, total_reward, RL.epsilon, step_cnt + 1))
-        if not IS_TEST:
-            reward_w(total_reward, 'reward.txt')
-            reward_w(moving_average_reward, 'moving_average_reward.txt')
+    if not IS_TEST:
+        file_w(total_rewards, 'reward.txt')
+        file_w(moving_average_rewards, 'moving_average_reward.txt')
+        file_w(loss_list, 'loss.txt')
 
     env.close()
     t2 = time.time()

@@ -44,49 +44,28 @@ def std(x):
     return ret
 
 
-def reward_w(reward, file_name, file_path='results/'):
+def file_w(lst, file_name, file_path='results/'):
     """
-    将得分写入文件
     :param reward: float
     :param file_name: string
+    :param file_path: string
     :return:
     """
-    score_string = '%.2f,' % reward
-    with open(file_path+file_name, 'a') as f:
-        f.write(score_string)
+    s = ','.join([str(ele) for ele in lst])
+    with open(file_path+file_name, 'w') as f:
+        f.write(s)
 
 
-def reward_r(file_name, file_path='results/'):
+def file_r(file_name, file_path='results/'):
     """
     :param file_name: string
+    :param file_path: string
     :return: list(float)
     """
     with open(file_path+file_name, 'r') as f:
-        reward_string = f.read()
-    reward_list = [float(ele) for ele in reward_string.split(',')[:-1]]
-    return reward_list
-
-
-def loss_w(loss, file_name, file_path='results/'):
-    """
-    :param loss: float
-    :param file_name: string
-    :return:
-    """
-    loss_string = '%.2f,' % loss
-    with open(file_path+file_name, 'a') as f:
-        f.write(loss_string)
-
-
-def loss_r(file_name, file_path='results/'):
-    """
-    :param file_name: string
-    :return: list(float)
-    """
-    with open(file_path+file_name, 'r') as f:
-        loss_string = f.read()
-    loss_list = [float(ele) for ele in loss_string.split(',')[:-1]]
-    return loss_list
+        s = f.read()
+    content_list = [float(ele) for ele in s.split(',')]
+    return content_list
 
 
 def make_pic(lst, title_name):
@@ -106,20 +85,22 @@ def make_pic(lst, title_name):
 if __name__ == '__main__':
     # 创建解析器
     parser = argparse.ArgumentParser()
-    parser.add_argument('--pics', type=str, default='', help='input sth')
+    parser.add_argument('--pics', type=str, default='', help='input name need to make pics')
     args = parser.parse_args()
-
     # reward
     if args.pics == 'reward':
-        lst = reward_r('reward.txt'.format(PICS_PATH))
+        lst = file_r('reward.txt')
         make_pic(lst, 'reward')
+    elif args.pics == 'moving_average_reward':
+        lst = file_r('moving_average_reward.txt')
+        make_pic(lst, 'moving_average_reward')
     # loss
     elif args.pics == 'loss':
-        lst = loss_r('loss.txt')
+        lst = file_r('loss.txt')
         make_pic(lst, 'loss')
     elif args.pics == 'a_loss':
-        lst = loss_r('a_loss.txt'.format(PICS_PATH))
+        lst = file_r('a_loss.txt'.format(PICS_PATH))
         make_pic(lst, 'a loss')
     elif args.pics == 'c_loss':
-        lst = loss_r('c_loss.txt'.format(PICS_PATH))
+        lst = file_r('c_loss.txt'.format(PICS_PATH))
         make_pic(lst, 'c loss')
