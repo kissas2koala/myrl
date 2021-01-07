@@ -21,6 +21,7 @@ def get_params():
     parser.add_argument("--eps_decay", default=500, type=float)
     parser.add_argument("--policy_lr", default=0.001, type=float)
     parser.add_argument("--memory_capacity", default=1000, type=int, help="capacity of Replay Memory")
+    parser.add_argument("--is_ddqn", default=False, type=bool, help="Double DQN")
 
     parser.add_argument("--batch_size", default=32, type=int,
                         help="batch size of memory sampling")
@@ -48,11 +49,12 @@ def main(params):
 
     RL = DQN(dim_obs=n_states, dim_act=n_actions, lr=params.policy_lr, gamma=params.gamma,
              eps_high=params.eps_high, eps_low=params.eps_low, eps_decay=params.eps_decay,
-             capacity=params.memory_capacity, batch_size=params.batch_size, target_replace=params.target_replace)
+             capacity=params.memory_capacity, batch_size=params.batch_size, target_replace=params.target_replace,
+             is_ddqn=params.is_ddqn)
 
     # execution
-    total_cnt = 0
     moving_average_reward = 0
+    total_cnt = 0
     for i_episode in range(1, params.train_eps + 1):
         step_cnt = 0
         total_reward = 0.0  # 每回合所有智能体的总体奖励
@@ -75,12 +77,12 @@ def main(params):
 
             if done:
                 break
+            step_cnt += 1
+            total_cnt += 1
 
         if i_episode % params.target_replace == 0:
             RL.target_net.load_state_dict(RL.policy_net.state_dict())
 
-        step_cnt += 1
-        total_cnt += 1
         moving_average_reward = total_reward if i_episode == 1 else moving_average_reward * 0.9 + total_reward * 0.1
         logger.info('episode:{}, reward:{}, e_greedy:{:.2f}, step:{}'.
                     format(i_episode, total_reward, RL.epsilon, step_cnt + 1))

@@ -64,7 +64,7 @@ MODEL_PATH = ''
 PICS_PATH = ''
 
 # todo is test
-IS_TEST = False
+IS_TEST = True
 
 # 离散动作
 IS_DISPERSED = True

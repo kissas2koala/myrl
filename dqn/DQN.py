@@ -17,8 +17,11 @@ from dqn.model import DQNModel
 
 
 class DQN:
-    def __init__(self, dim_obs, dim_act, lr, gamma, eps_high, eps_low, eps_decay, 
-                 batch_size, target_replace, capacity):
+    """
+    dqn or double dqn
+    """
+    def __init__(self, dim_obs, dim_act, lr=0.01, gamma=0.9, eps_high=0.95, eps_low=0.01, eps_decay=500,
+                 batch_size=32, target_replace=100, capacity=1000, is_ddqn=False):
         self.n_obs = dim_obs
         self.n_actions = dim_act
 
@@ -33,17 +36,20 @@ class DQN:
         self.memory = ReplayMemory(capacity)
         self.target_replace = target_replace
         self.scale_reward = 1
+        self.is_ddqn = is_ddqn
 
         self.use_cuda = GPU_CONFIG.use_cuda
+        self.device = 'gpu' if self.use_cuda else 'cpu'
         self.total_cnt = 0
         self.learn_cnt = 0
 
         self.policy_net, self.target_net = DQNModel(self.n_obs, self.n_actions), DQNModel(self.n_obs, self.n_actions)
-        # self.target_net = DQNModel(n_states, n_actions).to('gpu')  # 方法二
+        # self.target_net = DQNModel(n_states, n_actions).to(self.device)  # 方法二
         if self.use_cuda:
             logger.info('GPU Available')
             self.policy_net = self.policy_net.cuda()
             self.target_net = self.target_net.cuda()
+            # self.target_net = self.target_net.to(self.device)  # 方法二
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.loss_func = nn.MSELoss()
         self.optimizer = th.optim.Adam(self.policy_net.parameters(), lr=self.lr)
@@ -77,8 +83,13 @@ class DQN:
         # q_eval w.r.t the action in experience
         q_eval = self.policy_net(obs_batch).gather(1, action_batch)  # shape (batch, 1)
         logger.debug(q_eval.detach())
-        q_next = self.target_net(next_obs_batch).max(1)[0].detach()  # detach from graph, don't backpropagate
-        q_next = q_next.view(self.batch_size, 1)
+        if self.is_ddqn:
+            # use double dqn
+            max_policy_action = self.policy_net(next_obs_batch).max(1)[1].detach().view(self.batch_size, 1)
+            q_next = self.target_net(next_obs_batch).detach().gather(dim=1, index=max_policy_action)
+        else:
+            q_next = self.target_net(next_obs_batch).max(1)[0].detach()  # detach from graph, don't backpropagate
+            q_next = q_next.view(self.batch_size, 1)
         q_target = self.scale_reward*reward_batch + self.gamma * q_next * (1-done_batch)  # shape (batch, 1)
         loss = self.loss_func(q_eval, q_target)
 
@@ -95,7 +106,7 @@ class DQN:
         logger.debug('loss: {}'.format(loss))
         return loss
 
-    @th.no_grad()
+    @th.no_grad()  # 不去计算梯度
     def select_action(self, obs):
         eps_high = self.eps_high
         eps_low = self.eps_low
@@ -113,13 +124,3 @@ class DQN:
             action = np.zeros(1, dtype=np.int32)
             action[0] = np.random.randint(0, self.n_actions)
         return action
-
-
-class DoubleDQN(DQN):
-    def __init__(self, dim_obs, dim_act, lr, gamma, eps_high, eps_low, eps_decay,
-                 batch_size, target_replace, capacity):
-        super(DoubleDQN, self).__init__(dim_obs, dim_act, lr, gamma, eps_high, eps_low, eps_decay,
-                                        batch_size, target_replace, capacity)
-
-    def learn(self):
-        pass

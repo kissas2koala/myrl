@@ -8,6 +8,7 @@ import argparse
 
 from config import PICS_PATH
 
+
 def norm(x):
     """
     归一化
@@ -55,12 +56,12 @@ def reward_w(reward, file_name, file_path='results/'):
         f.write(score_string)
 
 
-def reward_r(file_name):
+def reward_r(file_name, file_path='results/'):
     """
     :param file_name: string
     :return: list(float)
     """
-    with open(file_name, 'r') as f:
+    with open(file_path+file_name, 'r') as f:
         reward_string = f.read()
     reward_list = [float(ele) for ele in reward_string.split(',')[:-1]]
     return reward_list
@@ -77,12 +78,12 @@ def loss_w(loss, file_name, file_path='results/'):
         f.write(loss_string)
 
 
-def loss_r(file_name):
+def loss_r(file_name, file_path='results/'):
     """
     :param file_name: string
     :return: list(float)
     """
-    with open(file_name, 'r') as f:
+    with open(file_path+file_name, 'r') as f:
         loss_string = f.read()
     loss_list = [float(ele) for ele in loss_string.split(',')[:-1]]
     return loss_list
@@ -122,6 +123,3 @@ if __name__ == '__main__':
     elif args.pics == 'c_loss':
         lst = loss_r('c_loss.txt'.format(PICS_PATH))
         make_pic(lst, 'c loss')
-    # other utils test
-    else:
-        pass
