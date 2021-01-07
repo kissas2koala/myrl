@@ -9,6 +9,7 @@
 import math
 import torch as th
 import torch.nn as nn
+import torch.nn.functional as F
 import numpy as np
 
 from config import logger, GPU_CONFIG
@@ -51,7 +52,12 @@ class DQN:
             self.target_net = self.target_net.cuda()
             # self.target_net = self.target_net.to(self.device)  # 方法二
         self.target_net.load_state_dict(self.policy_net.state_dict())
+
+        # loss
         self.loss_func = nn.MSELoss()
+        # self.loss_func = F.smooth_l1_loss  # 计算Huber损失
+
+        # optimizer
         self.optimizer = th.optim.Adam(self.policy_net.parameters(), lr=self.lr)
 
         self.FloatTensor = th.cuda.FloatTensor if self.use_cuda else th.FloatTensor
