@@ -1,4 +1,2 @@
 todo
-2 绘制epsilon曲线
-3 测试target replace
 4 多条曲线绘制同一张图上

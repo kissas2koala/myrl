@@ -17,9 +17,9 @@ def get_params():
     parser.add_argument("--train", default=1, type=int)  # 1 表示训练，0表示只进行eval
     parser.add_argument("--gamma", default=0.99, type=float)
     parser.add_argument("--eps_high", default=0.95, type=float)  # 基于贪心选择action对应的参数epsilon
-    parser.add_argument("--eps_low", default=0.001, type=float)
+    parser.add_argument("--eps_low", default=0.01, type=float)
     parser.add_argument("--eps_decay", default=500, type=float)
-    parser.add_argument("--policy_lr", default=0.01, type=float)
+    parser.add_argument("--policy_lr", default=0.001, type=float)
     parser.add_argument("--memory_capacity", default=1000, type=int, help="capacity of Replay Memory")
     parser.add_argument("--is_ddqn", default=False, type=bool, help="Double DQN")
 
@@ -49,8 +49,7 @@ def main(params):
 
     RL = DQN(dim_obs=n_states, dim_act=n_actions, lr=params.policy_lr, gamma=params.gamma,
              eps_high=params.eps_high, eps_low=params.eps_low, eps_decay=params.eps_decay,
-             capacity=params.memory_capacity, batch_size=params.batch_size, target_replace=params.target_replace,
-             is_ddqn=params.is_ddqn)
+             capacity=params.memory_capacity, batch_size=params.batch_size, is_ddqn=params.is_ddqn)
 
     # execution
     total_rewards = []

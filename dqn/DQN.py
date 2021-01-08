@@ -12,7 +12,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
 
-from config import logger, GPU_CONFIG
+from config import logger, GPU_CONFIG, IS_TEST
 from dqn.memo import ReplayMemory, Experience
 from dqn.model import DQNModel
 
@@ -22,7 +22,7 @@ class DQN:
     dqn or double dqn
     """
     def __init__(self, dim_obs, dim_act, lr=0.01, gamma=0.9, eps_high=0.95, eps_low=0.01, eps_decay=500,
-                 batch_size=32, target_replace=100, capacity=1000, is_ddqn=False):
+                 batch_size=32, capacity=1000, is_ddqn=False):
         self.n_obs = dim_obs
         self.n_actions = dim_act
 
@@ -35,7 +35,7 @@ class DQN:
         self.eps_low = eps_low
         self.eps_decay = eps_decay
         self.memory = ReplayMemory(capacity)
-        self.target_replace = target_replace
+        self.target_replace = 200  # 网络替换的第二种方式
         self.scale_reward = 1
         self.is_ddqn = is_ddqn
 
@@ -64,12 +64,13 @@ class DQN:
         self.LongTensor = th.cuda.LongTensor if self.use_cuda else th.LongTensor
 
     def learn(self):
-        # check to replace target parameters
+        # check to replace target parameters  网络替换的第二种方式
         # if self.learn_cnt % self.target_replace == 0:
         #     self.target_net.load_state_dict(self.policy_net.state_dict())
         #     logger.debug('target_params_replaced')
-        #     learn_cnt_str = '%09d' % self.learn_cnt
-        #     th.save(self.target_net.state_dict(), 'model/dqn/model_' + learn_cnt_str + '.pkl')
+        #     if IS_TEST:
+        #         learn_cnt_str = '%09d' % self.learn_cnt
+        #         th.save(self.target_net.state_dict(), 'model/dqn/model_' + learn_cnt_str + '.pkl')
         # self.learn_cnt += 1
 
         # sample batch from all memory

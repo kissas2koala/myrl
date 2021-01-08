@@ -1,6 +1,8 @@
 #
 # coding=utf-8
 
+
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 import torch as th
@@ -82,6 +84,22 @@ def make_pic(lst, title_name):
     plt.show()
 
 
+def make_pics(title_name):
+    _, _, files = os.walk('results/').__next__()
+    for file in files:
+        file_prefix = file.split('.')[0]
+        file_lst = file_prefix.split('@')
+        if title_name == file_lst[0]:
+            lst = file_r(file)
+            plt.title(file_lst[0])
+            x = np.arange(1, len(lst)+1)
+            y = np.array(lst)
+            label = file_lst[1].split('.')[0] if len(file_lst) > 1 else None  # 添加图的标签
+            plt.plot(x, y, label=label)
+    plt.legend()  # 添加图例
+    plt.show()
+
+
 if __name__ == '__main__':
     # 创建解析器
     parser = argparse.ArgumentParser()
@@ -89,18 +107,17 @@ if __name__ == '__main__':
     args = parser.parse_args()
     # reward
     if args.pics == 'reward':
-        lst = file_r('reward.txt')
-        make_pic(lst, 'reward')
+        make_pics('reward')
     elif args.pics == 'moving_average_reward':
-        lst = file_r('moving_average_reward.txt')
-        make_pic(lst, 'moving_average_reward')
+        make_pics('moving_average_reward')
     # loss
     elif args.pics == 'loss':
-        lst = file_r('loss.txt')
-        make_pic(lst, 'loss')
+        make_pics('loss')
     elif args.pics == 'a_loss':
-        lst = file_r('a_loss.txt'.format(PICS_PATH))
+        lst = file_r('a_loss.txt')
         make_pic(lst, 'a loss')
     elif args.pics == 'c_loss':
-        lst = file_r('c_loss.txt'.format(PICS_PATH))
+        lst = file_r('c_loss.txt')
         make_pic(lst, 'c loss')
+    else:
+        make_pics(1)
