@@ -87,14 +87,13 @@ def make_pic(lst, title_name):
 def make_pics(title_name):
     _, _, files = os.walk('results/').__next__()
     for file in files:
-        file_prefix = file.split('.')[0]
-        file_lst = file_prefix.split('@')
+        file_lst = file.split('@')
         if title_name == file_lst[0]:
             lst = file_r(file)
             plt.title(file_lst[0])
             x = np.arange(1, len(lst)+1)
             y = np.array(lst)
-            label = file_lst[1].split('.')[0] if len(file_lst) > 1 else None  # 添加图的标签
+            label = file_lst[1]  # 添加图的标签
             plt.plot(x, y, label=label)
     plt.legend()  # 添加图例
     plt.show()
