@@ -52,6 +52,7 @@ class DQN:
             self.target_net = self.target_net.cuda()
             # self.target_net = self.target_net.to(self.device)  # 方法二
         self.target_net.load_state_dict(self.policy_net.state_dict())
+        # self.target_net.eval()  # 不启用 BatchNormalization 和 Dropout
 
         # loss
         self.loss_func = nn.MSELoss()
