@@ -22,7 +22,7 @@ class DQN:
     dqn or double dqn
     """
     def __init__(self, dim_obs, dim_act, lr=0.01, gamma=0.9, eps_high=0.95, eps_low=0.01, eps_decay=500,
-                 batch_size=32, capacity=1000, is_ddqn=False):
+                 batch_size=32, capacity=1000, is_ddqn=False, hidden_units_num=64):
         self.n_obs = dim_obs
         self.n_actions = dim_act
 
@@ -44,7 +44,9 @@ class DQN:
         self.total_cnt = 0
         self.learn_cnt = 0
 
-        self.policy_net, self.target_net = DQNModel(self.n_obs, self.n_actions), DQNModel(self.n_obs, self.n_actions)
+        # create policy and target net
+        self.policy_net = DQNModel(self.n_obs, self.n_actions, hidden_units_num)
+        self.target_net = DQNModel(self.n_obs, self.n_actions, hidden_units_num)
         # self.target_net = DQNModel(n_states, n_actions).to(self.device)  # 方法二
         if self.use_cuda:
             logger.info('GPU Available')
