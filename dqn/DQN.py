@@ -35,7 +35,7 @@ class DQN:
         self.eps_low = eps_low
         self.eps_decay = eps_decay
         self.memory = ReplayMemory(capacity)
-        self.target_replace = 200  # 网络替换的第二种方式
+        self.target_replace = 100  # 网络替换的第二种方式
         self.scale_reward = 1
         self.is_ddqn = is_ddqn
 

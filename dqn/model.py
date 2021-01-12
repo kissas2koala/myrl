@@ -14,6 +14,7 @@ class DQNModel(nn.Module):
 
         self.LReLU = nn.LeakyReLU(0.01)
         self.ReLU = nn.ReLU()
+        self.Tanh = nn.Tanh()
 
         # self.reset_parameters()
 

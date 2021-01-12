@@ -1,9 +1,4 @@
 todo
-batch_size
-target_replace
-激活函数
-优化函数
-epsilon
 
 1 写一个输出值分布的方法
 2 正则化
@@ -13,4 +8,9 @@ gamma: 0.99略>0.9>0.99
 lr: 0.001>0.005>0.01
 hidden_units_num: 32(完美)>64略>128>16>8
 hidden_layers_num: 2>3>1
+batch_size: 16，32, 64, 128相差不大
+target_replace: 0.5,1,2略>4
+激活函数: tanh略>relu>>leaky_relu
+epsilon_decay: 200, 500, 800相差不大
+optimizer: 2层+32+mse>3层+64+huber
 
