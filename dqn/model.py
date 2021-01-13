@@ -6,11 +6,11 @@ import torch.nn as nn
 
 
 class DQNModel(nn.Module):
-    def __init__(self, dim_obs, dim_action, hidden_units_num):
+    def __init__(self, dim_obs, dim_action, hidden_size):
         super(DQNModel, self).__init__()
-        self.linear_1 = nn.Linear(dim_obs, hidden_units_num)
-        self.linear_2 = nn.Linear(hidden_units_num, hidden_units_num)
-        self.linear_out = nn.Linear(hidden_units_num, dim_action)
+        self.linear_1 = nn.Linear(dim_obs, hidden_size)
+        self.linear_2 = nn.Linear(hidden_size, hidden_size)
+        self.linear_out = nn.Linear(hidden_size, dim_action)
 
         self.LReLU = nn.LeakyReLU(0.01)
         self.ReLU = nn.ReLU()

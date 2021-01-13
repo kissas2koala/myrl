@@ -7,7 +7,7 @@ import argparse
 import numpy as np
 import gym
 
-from dqn.DQN import DQN
+from ddpg.DDPG import DDPG
 from config import logger, IS_TEST
 from utils import file_w
 
@@ -16,17 +16,13 @@ def get_params():
     parser = argparse.ArgumentParser()
     parser.add_argument("--train", default=1, type=int)  # 1 表示训练，0表示只进行eval
     parser.add_argument("--gamma", default=0.99, type=float)
-    parser.add_argument("--eps_high", default=0.95, type=float)  # 基于贪心选择action对应的参数epsilon
-    parser.add_argument("--eps_low", default=0.01, type=float)
-    parser.add_argument("--eps_decay", default=500, type=float)
-    parser.add_argument("--target_replace", default=1, type=int,
-                        help="when(every default 2 eisodes) to update target net ")  # 更新频率
-    parser.add_argument("--is_ddqn", default=False, type=bool, help="Double DQN")
+    parser.add_argument("--tau", default=0.01, type=float)
 
-    parser.add_argument("--policy_lr", default=0.001, type=float)
-    parser.add_argument("--hidden_size", default=32, type=int)
-    parser.add_argument("--memory_capacity", default=1000, type=int, help="capacity of Replay Memory")
-    parser.add_argument("--batch_size", default=32, type=int, help="batch size of memory sampling")
+    parser.add_argument("--critic_lr", default=1e-3, type=float)
+    parser.add_argument("--actor_lr", default=1e-4, type=float)
+    parser.add_argument("--hidden_size", default=128, type=int)
+    parser.add_argument("--memory_capacity", default=10000, type=int, help="capacity of Replay Memory")
+    parser.add_argument("--batch_size", default=64, type=int, help="batch size of memory sampling")
 
     parser.add_argument("--max_eps", default=200, type=int)  # 训练的最大episode数目
     parser.add_argument("--max_steps", default=200, type=int)
@@ -38,17 +34,16 @@ def get_params():
 def main(params):
     t1 = time.time()
     # environment
-    env = gym.make('CartPole-v0')
+    env = gym.make('Pendulum-v0')
     env.seed(1)
     n_states = env.observation_space.shape[0]  # (4, )
-    n_actions = env.action_space.n  # 2
+    n_actions = env.action_space.shape[0]  # 1 -2<x<2
     logger.info("obs num: %d" % n_states)
     logger.info("act num: %d" % n_actions)
 
-    RL = DQN(dim_obs=n_states, dim_act=n_actions, lr=params.policy_lr, gamma=params.gamma,
-             eps_high=params.eps_high, eps_low=params.eps_low, eps_decay=params.eps_decay,
-             capacity=params.memory_capacity, batch_size=params.batch_size, is_ddqn=params.is_ddqn,
-             hidden_size=params.hidden_size)
+    RL = DDPG(dim_obs=n_states, dim_act=n_actions, actor_lr=params.actor_lr, critic_lr=params.critic_lr,
+              gamma=params.gamma,capacity=params.memory_capacity, batch_size=params.batch_size, tau=params.tau,
+              hidden_size=params.hidden_size)
 
     # execution
     total_rewards = []
@@ -61,9 +56,9 @@ def main(params):
         # eps_r = 0.
         obs = env.reset()
         for i_step in range(params.max_steps):
-            # env.render()
+            env.render()
             act = RL.select_action(obs)
-            # logger.info("selet action: ", act)
+            logger.info("selet action: ", act)
             action = np.squeeze(act)
             next_obs, r, done, _ = env.step(action)
             total_reward += r
@@ -76,6 +71,8 @@ def main(params):
                 loss_list.append(loss)
 
             if done:
+                print('done')
+                time.sleep(2)
                 break
             total_cnt += 1
 
@@ -88,7 +85,7 @@ def main(params):
         logger.info('episode:{}, reward:{}, e_greedy:{:.2f}, step:{}'.
                     format(i_episode, total_reward, RL.epsilon, i_step + 1))
     if not IS_TEST:
-        label = '' or 'mse'
+        label = '' or ''
         file_w(total_rewards, 'reward@{}@.txt'.format(label))
         file_w(moving_average_rewards, 'moving_average_reward@{}@.txt'.format(label))
         file_w(loss_list, 'loss@{}@.txt'.format(label))
