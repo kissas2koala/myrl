@@ -56,7 +56,7 @@ def main(params):
         # eps_r = 0.
         obs = env.reset()
         for i_step in range(params.max_steps):
-            env.render()
+            # env.render()
             act = RL.select_action(obs)
             logger.info("selet action: ", act)
             action = np.squeeze(act)
@@ -71,8 +71,6 @@ def main(params):
                 loss_list.append(loss)
 
             if done:
-                print('done')
-                time.sleep(2)
                 break
             total_cnt += 1
 
