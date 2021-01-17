@@ -1,5 +1,5 @@
 #
-# coding=utf-9
+# coding=utf-8
 
 
 import torch as th
@@ -40,8 +40,7 @@ class Actor(nn.Module):
         self.linear_3.bias.data.uniform_(-init_w, init_w)
 
     def forward(self, obs):
-        x = th.cat((obs), dim=1)
-        x = F.relu(self.linear_1(x))
+        x = F.relu(self.linear_1(obs))
         x = F.relu(self.linear_2(x))
         out = F.tanh(self.linear_3(x))
         return out

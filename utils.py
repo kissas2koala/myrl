@@ -113,10 +113,9 @@ if __name__ == '__main__':
     elif args.pics == 'loss':
         make_pics('loss')
     elif args.pics == 'a_loss':
-        lst = file_r('a_loss.txt')
-        make_pic(lst, 'a loss')
+        make_pics('a_loss')
     elif args.pics == 'c_loss':
-        lst = file_r('c_loss.txt')
-        make_pic(lst, 'c loss')
+        make_pics('c_loss')
     else:
-        make_pics(1)
+        lst = [1,2]
+        file_w(lst, 'hahah.txt')

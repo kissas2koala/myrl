@@ -66,9 +66,6 @@ PICS_PATH = ''
 # todo is test
 IS_TEST = False
 
-# 离散动作
-IS_DISPERSED = True
-
 if __name__ == '__main__':
     # logger.debug("debug")
     pass

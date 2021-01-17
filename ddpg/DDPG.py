@@ -43,14 +43,14 @@ class DDPG:
         self.critic_optimizer = th.optim.Adam(self.critic.parameters(), lr=critic_lr)
         self.actor_optimizer = th.optim.Adam(self.actor.parameters(), lr=actor_lr)
 
-    def update(self):
+    def learn(self):
         # sample batch from all memory
         transitions = self.memory.sample(self.batch_size)
         batch = Experience(*zip(*transitions))  # class(list)
         obs_batch = self.FloatTensor(np.array(batch.obs))  # torch.Size([32, 4])
         # obs_batch = th.tensor(obs_batch, device=self.device, dtype=th.float)  # 方法二
         logger.debug("obs_batch: {}".format(obs_batch.shape))
-        action_batch = self.LongTensor(np.array(batch.action))  # (batch, 1)
+        action_batch = self.FloatTensor(np.array(batch.action))  # (batch, 1)
         logger.debug('action batch: {}'.format(action_batch.shape))
         reward_batch = self.FloatTensor(np.array(batch.reward)).view(self.batch_size, 1)  # (batch, 1)
         logger.debug('reward_batch: {}'.format(reward_batch.shape))
@@ -79,6 +79,10 @@ class DDPG:
         # soft update actor_target, critic_target
         soft_update(self.target_critic, self.critic, self.tau)
         soft_update(self.target_actor, self.actor, self.tau)
+
+        a_loss = a_loss.detach().cpu().numpy() if GPU_CONFIG.use_cuda else a_loss.detach().numpy()
+        c_loss = c_loss.detach().cpu().numpy() if GPU_CONFIG.use_cuda else c_loss.detach().numpy()
+        return a_loss, c_loss
 
     @th.no_grad()
     def select_action(self, obs):
