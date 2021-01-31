@@ -105,6 +105,9 @@ class DQN:
 
         self.optimizer.zero_grad()
         loss.backward()
+        #
+        param = self.policy_net.parameters().next()
+        grad_ = th.mean(param.grad.data)
         # clip grad
         for param in self.policy_net.parameters():
             param.grad.data.clamp_(-1, 1)
@@ -114,7 +117,7 @@ class DQN:
         # loss
         loss = loss.detach().cpu().numpy() if self.use_cuda else loss.detach().numpy()
         logger.debug('loss: {}'.format(loss))
-        return loss
+        return loss, grad_
 
     @th.no_grad()  # 不去计算梯度
     def select_action(self, obs):
