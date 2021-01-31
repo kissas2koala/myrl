@@ -13,4 +13,16 @@ target_replace: 0.5,1,2略>4
 激活函数: tanh略>relu>>leaky_relu
 epsilon_decay: 200, 500, 800相差不大
 optimizer: 2层+32+mse>3层+64+huber
+grad_cliP: no_grad_clip, grad_clip, grad_norm差别不大，说明没有梯度爆炸
 
+
+Pendulum-v0, ddpg, 训练对比:
+todo:
+gamma:
+lr:
+hidden_size:
+hidden_layer:
+batch_size:
+激活函数:
+optimizer:
+action范围: [-1,1]>[-2,2]

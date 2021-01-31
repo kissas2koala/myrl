@@ -88,10 +88,10 @@ def main(params):
         logger.info('episode:{}, reward:{}, e_greedy:{:.2f}, step:{}'.
                     format(i_episode, total_reward, RL.epsilon, i_step + 1))
     if not IS_TEST:
-        label = '' or 'mse'
-        file_w(total_rewards, 'reward@{}@.txt'.format(label))
+        label = '' or 'grad_clip'
+        # file_w(total_rewards, 'reward@{}@.txt'.format(label))
         file_w(moving_average_rewards, 'moving_average_reward@{}@.txt'.format(label))
-        file_w(loss_list, 'loss@{}@.txt'.format(label))
+        # file_w(loss_list, 'loss@{}@.txt'.format(label))
 
     env.close()
     t2 = time.time()

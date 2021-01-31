@@ -36,13 +36,16 @@ def get_params():
 def main(params):
     t1 = time.time()
     # environment
-    env = NormalizedActions(gym.make("Pendulum-v0"))
+    env = gym.make("Pendulum-v0")
+    # env = NormalizedActions(env)
     env.seed(1)
     ou_noise = OUNoise(env.action_space)
     n_states = env.observation_space.shape[0]  # (4, )
-    n_actions = env.action_space.shape[0]  # 1 -2<x<2
+    n_actions = env.action_space.shape[0]  # 1 -2<x<2, changed: -1<x<1
     logger.info("obs num: %d" % n_states)
     logger.info("act num: %d" % n_actions)
+    logger.info("act high: %d" % env.action_space.high)
+    logger.info("act low: %d" % env.action_space.low)
 
     RL = DDPG(dim_obs=n_states, dim_act=n_actions, actor_lr=params.actor_lr, critic_lr=params.critic_lr,
               gamma=params.gamma,capacity=params.memory_capacity, batch_size=params.batch_size, tau=params.tau,
@@ -63,15 +66,15 @@ def main(params):
         for i_step in range(params.max_steps):
             # env.render()
             act = RL.select_action(obs)
-            # logger.info("selet action: {}".format(act))
+            # logger.info("select act: {}".format(act))
             action = np.squeeze(act)
             action =ou_noise.get_action(action, i_step)
-            # logger.info("selet action: {}".format(act))
+            # logger.info("select action: {}".format(act))
             # action = env.action_space.sample()
             next_obs, r, done, _ = env.step(action)
             total_reward += r
             # if done: r=0
-            RL.memory.push(obs, action, next_obs, r, done)
+            RL.memory.push(obs, action, next_obs, r*100, done)
             obs = next_obs
 
             if total_cnt > params.batch_size:
@@ -88,7 +91,7 @@ def main(params):
         total_rewards.append(total_reward)
         logger.info('episode:{}, reward:{}, step:{}'.format(i_episode, total_reward, i_step + 1))
     if not IS_TEST:
-        label = '' or ''
+        label = '' or 'r10'
         file_w(total_rewards, 'reward@{}@.txt'.format(label))
         file_w(moving_average_rewards, 'moving_average_reward@{}@.txt'.format(label))
         file_w(a_loss_list, 'a_loss@{}@.txt'.format(label))
