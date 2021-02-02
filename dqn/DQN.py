@@ -43,6 +43,8 @@ class DQN:
         self.device = 'gpu' if self.use_cuda else 'cpu'
         self.total_cnt = 0
         self.learn_cnt = 0
+        self.loss_list = []  # [float, ..]
+        self.grad_list = []  # [float, ..]
 
         # create policy and target net
         self.policy_net = DQNModel(self.n_obs, self.n_actions, hidden_size)
@@ -105,19 +107,23 @@ class DQN:
 
         self.optimizer.zero_grad()
         loss.backward()
-        #
-        param = self.policy_net.parameters().next()
-        grad_ = th.mean(param.grad.data)
         # clip grad
         for param in self.policy_net.parameters():
             param.grad.data.clamp_(-1, 1)
         # nn.utils.clip_grad_norm_(self.policy_net.parameters(), 1) # 方法二
+        # store grad
+        param = next(self.policy_net.parameters())
+        grad_mean = th.mean(param.grad.data)
         self.optimizer.step()
 
         # loss
         loss = loss.detach().cpu().numpy() if self.use_cuda else loss.detach().numpy()
         logger.debug('loss: {}'.format(loss))
-        return loss, grad_
+        self.loss_list.append(loss)
+        # grad_mean
+        grad_mean = grad_mean.detach().cpu().numpy() if self.use_cuda else grad_mean.detach().numpy()
+        self.grad_list.append(grad_mean)
+
 
     @th.no_grad()  # 不去计算梯度
     def select_action(self, obs):

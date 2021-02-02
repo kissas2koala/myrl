@@ -116,6 +116,9 @@ if __name__ == '__main__':
         make_pics('a_loss')
     elif args.pics == 'c_loss':
         make_pics('c_loss')
+    # grad
+    elif args.pics == 'grad':
+        make_pics('grad')
     else:
         lst = [1,2]
         file_w(lst, 'hahah.txt')

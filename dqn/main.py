@@ -54,7 +54,6 @@ def main(params):
     total_rewards = []
     moving_average_rewards = []
     moving_average_reward = 0.0
-    loss_list = []
     total_cnt = 0
     for i_episode in range(1, params.max_eps + 1):
         total_reward = 0.0  # 每回合所有智能体的总体奖励
@@ -72,8 +71,7 @@ def main(params):
             obs = next_obs
 
             if total_cnt > params.batch_size:
-                loss = RL.learn()
-                loss_list.append(loss)
+                RL.learn()
 
             if done:
                 break
@@ -91,7 +89,8 @@ def main(params):
         label = '' or 'grad_clip'
         # file_w(total_rewards, 'reward@{}@.txt'.format(label))
         file_w(moving_average_rewards, 'moving_average_reward@{}@.txt'.format(label))
-        # file_w(loss_list, 'loss@{}@.txt'.format(label))
+        # file_w(RL.loss_list, 'loss@{}@.txt'.format(label))
+        file_w(RL.grad_list, 'grad@{}@.txt'.format(label))
 
     env.close()
     t2 = time.time()
