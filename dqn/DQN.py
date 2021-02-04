@@ -124,7 +124,6 @@ class DQN:
         grad_mean = grad_mean.detach().cpu().numpy() if self.use_cuda else grad_mean.detach().numpy()
         self.grad_list.append(grad_mean)
 
-
     @th.no_grad()  # 不去计算梯度
     def select_action(self, obs):
         eps_high = self.eps_high

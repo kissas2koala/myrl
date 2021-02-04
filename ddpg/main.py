@@ -9,7 +9,7 @@ import gym
 
 from ddpg.DDPG import DDPG
 from ddpg.env import NormalizedActions
-from ddpg.noise import OUNoise
+from ddpg.noise import OUNoise, GaussianNoise
 from config import logger, IS_TEST
 from utils import file_w
 
