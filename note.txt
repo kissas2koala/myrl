@@ -24,7 +24,7 @@ hidden_size: 64=128>32
 hidden_layer: 2>1, 1没收敛
 batch_size: 32=64=128
 激活函数: tanh>relu
-tau:
+tau: 0.1=0.01=0.001
 noise:
 action范围: [-1,1]>[-2,2]
 reward_scale: 1>10>100

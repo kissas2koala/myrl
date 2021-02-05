@@ -91,7 +91,7 @@ def main(params):
         total_rewards.append(total_reward)
         logger.info('episode:{}, reward:{}, step:{}'.format(i_episode, total_reward, i_step + 1))
     if not IS_TEST:
-        label = '' or 'tanh'
+        label = '' or params.tau
         # file_w(total_rewards, 'reward@{}@.txt'.format(label))
         file_w(moving_average_rewards, 'moving_average_reward@{}@.txt'.format(label))
         # file_w(a_loss_list, 'a_loss@{}@.txt'.format(label))
