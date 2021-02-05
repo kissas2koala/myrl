@@ -22,7 +22,7 @@ class Critic(nn.Module):
     def forward(self, obs, action):
         x = th.cat((obs, action), dim=1)
         x = F.relu(self.linear_1(x))
-        # x = F.relu(self.linear_2(x))
+        x = F.relu(self.linear_2(x))
         out = self.linear_3(x)
         return out
 
@@ -41,6 +41,6 @@ class Actor(nn.Module):
 
     def forward(self, obs):
         x = F.relu(self.linear_1(obs))
-        # x = F.relu(self.linear_2(x))
+        x = F.relu(self.linear_2(x))
         out = F.tanh(self.linear_3(x))
         return out

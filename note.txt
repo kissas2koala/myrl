@@ -22,7 +22,7 @@ gamma: 0.9=0.99>0.999, 0.7没收敛
 critic_lr: 0.01=0.001>0.0001
 hidden_size: 64=128>32
 hidden_layer: 2>1, 1没收敛
-batch_size:
+batch_size: 32=64=128
 激活函数:
 tau:
 noise:
