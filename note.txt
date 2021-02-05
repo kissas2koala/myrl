@@ -18,11 +18,13 @@ grad_cliP: no_grad_clip, grad_clip, grad_norm差别不大，说明没有梯度�
 
 Pendulum-v0, ddpg, 训练对比:
 todo:
-gamma:
-lr:
+gamma: 0.9=0.99>0.999, 0.7没收敛
+critic_lr: 0.01=0.001>0.0001
 hidden_size:
 hidden_layer:
 batch_size:
 激活函数:
-optimizer:
+tau:
+noise:
 action范围: [-1,1]>[-2,2]
+reward_scale: 1>10>100
