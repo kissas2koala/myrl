@@ -22,7 +22,7 @@ def get_params():
 
     parser.add_argument("--critic_lr", default=1e-3, type=float)
     parser.add_argument("--actor_lr", default=1e-4, type=float)
-    parser.add_argument("--hidden_size", default=32, type=int)
+    parser.add_argument("--hidden_size", default=128, type=int)
     parser.add_argument("--memory_capacity", default=10000, type=int, help="capacity of Replay Memory")
     parser.add_argument("--batch_size", default=64, type=int, help="batch size of memory sampling")
 
@@ -91,7 +91,7 @@ def main(params):
         total_rewards.append(total_reward)
         logger.info('episode:{}, reward:{}, step:{}'.format(i_episode, total_reward, i_step + 1))
     if not IS_TEST:
-        label = '' or params.hidden_size
+        label = '' or '1'
         # file_w(total_rewards, 'reward@{}@.txt'.format(label))
         file_w(moving_average_rewards, 'moving_average_reward@{}@.txt'.format(label))
         # file_w(a_loss_list, 'a_loss@{}@.txt'.format(label))
