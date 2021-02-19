@@ -46,7 +46,7 @@ class A2C:
         self.critic_optimizer.step()
         # a_loss
         acts_prob = self.actor(s)
-        a_loss = advantage.detach() * th.log(acts_prob.gather(1, a))
+        a_loss = -(advantage.detach() * th.log(acts_prob.gather(1, a))).mean()
         self.actor_optimizer.zero_grad()
         a_loss.backward()
         self.actor_optimizer.step()

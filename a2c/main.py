@@ -16,11 +16,11 @@ def get_params():
     parser.add_argument("--train", default=1, type=int)  # 1 表示训练，0表示只进行eval
     parser.add_argument("--gamma", default=0.99, type=float)
 
-    parser.add_argument("--critic_lr", default=1e-2, type=float)
-    parser.add_argument("--actor_lr", default=1e-3, type=float)
+    parser.add_argument("--critic_lr", default=1e-3, type=float)
+    parser.add_argument("--actor_lr", default=1e-4, type=float)
     parser.add_argument("--hidden_size", default=32, type=int)
 
-    parser.add_argument("--max_eps", default=200, type=int)  # 训练的最大episode数目
+    parser.add_argument("--max_eps", default=800, type=int)  # 训练的最大episode数目
     parser.add_argument("--max_steps", default=200, type=int)
     params = parser.parse_args()
 
@@ -49,8 +49,7 @@ def main(params):
         total_reward = 0.0
         s = env.reset()
         for i_step in range(params.max_steps):
-            act = RL.choose_action(s)
-            action = np.squeeze(act)
+            action = RL.choose_action(s)
             s_, r, done, _ = env.step(action)
             total_reward += r
 
