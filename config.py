@@ -17,19 +17,19 @@ class Logger(object):
         else:
             raise (Exception('level params error!'))
 
-    def info(self, msg):
+    def info(self, *args):
         if self.level < 2:
-            print(msg)
+            print(args)
 
-    def debug(self, msg=None):
+    def debug(self, *args):
         if self.level < 1:
             # msg = msg if msg else 'wait!'
-            print(msg)
+            print(args)
             # input('pause: input sth and enter: ')
 
-    def warn(self, msg):
+    def warn(self, *args):
         if self.level < 3:
-            print(msg)
+            print(args)
 
     def wait(self):
         input('wait! pause: input sth and enter: ')
