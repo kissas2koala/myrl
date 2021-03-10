@@ -99,6 +99,8 @@ class PPO:
             self.critic_optimizer.zero_grad()
             c_loss.backward()
             self.critic_optimizer.step()
+        # policy to old_policy
+        self.old_actor.load_state_dict(self.actor.state_dict())
         return a_loss, c_loss
 
     @th.no_grad()
