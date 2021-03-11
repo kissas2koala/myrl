@@ -31,3 +31,4 @@ reward_scale: 1>10>100
 CartPole-v0, ppo, 训练对比:
 batch_size: 上升速率 128>64>32, 稳定性32>64>128
 activation: 上升速率 tanh>relu, 训练后期稳定行tanh>relu
+pre_reward: 未加v_next的reward > 加v_next的reward

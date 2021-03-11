@@ -72,10 +72,22 @@ class PPO:
         # pre reward
         buffer_r = []
         discounted_reward = 0.
-        for i in range(len(self.buffer.buffer_r)-1, -1, -1):
+        flag = True
+        for i in range(len(self.buffer.buffer_r)-1, -1, -1):  # reverse
+            # 方法一: r = r + gamma * r_next
             if self.buffer.buffer_done[i]:
                 discounted_reward = 0.
             discounted_reward = self.buffer.buffer_r[i] + (self.gamma * discounted_reward)
+            # 方法二: v_next = r + gamma * v_next
+            # if self.buffer.buffer_done[i]:
+            #     discounted_reward = self.buffer.buffer_r[i]
+            #     flag = True
+            # else:
+            #     logger.debug(self.critic(buffer_s_[i]).detach().numpy()[0])
+            #     if flag: discounted_reward = self.critic(buffer_s_[i]).detach().numpy()[0]
+            #     discounted_reward = self.buffer.buffer_r[i] + (self.gamma * discounted_reward)
+            #     logger.debug(discounted_reward)
+            #     flag = False
             buffer_r.append(discounted_reward)
         buffer_r.reverse()
         buffer_r = self.FloatTensor(np.array(buffer_r)).view(self.buffer_size, 1)
@@ -84,8 +96,6 @@ class PPO:
         value = self.critic(buffer_s).detach()
         advantage = buffer_r - value
         old_acts_prob = self.old_actor(buffer_s).detach()
-        logger.info(old_acts_prob[0:2,:])
-        logger.wait()
         for _ in range(self.a_update_epochs):
             acts_prob = self.actor(buffer_s)
             ratio = acts_prob.gather(1, buffer_a) / old_acts_prob.gather(1, buffer_a)
