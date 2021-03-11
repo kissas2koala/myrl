@@ -20,8 +20,8 @@ class Critic(nn.Module):
 
     def forward(self, obs):
         x = obs
-        x = F.relu(self.linear_1(x))
-        x = F.relu(self.linear_2(x))
+        x = F.tanh(self.linear_1(x))
+        x = F.tanh(self.linear_2(x))
         out = self.linear_3(x)
         return out
 
@@ -39,7 +39,7 @@ class Actor(nn.Module):
         # self.linear_3.bias.data.uniform_(-init_w, init_w)
 
     def forward(self, obs):
-        x = F.relu(self.linear_1(obs))
-        x = F.relu(self.linear_2(x))
+        x = F.tanh(self.linear_1(obs))
+        x = F.tanh(self.linear_2(x))
         out = F.softmax(self.linear_3(x), dim=1)
         return out

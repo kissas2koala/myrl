@@ -79,10 +79,13 @@ class PPO:
             buffer_r.append(discounted_reward)
         buffer_r.reverse()
         buffer_r = self.FloatTensor(np.array(buffer_r)).view(self.buffer_size, 1)
+        logger.debug(buffer_s.size(), buffer_a.size(), buffer_r.size())
         # a_loss
         value = self.critic(buffer_s).detach()
         advantage = buffer_r - value
         old_acts_prob = self.old_actor(buffer_s).detach()
+        logger.info(old_acts_prob[0:2,:])
+        logger.wait()
         for _ in range(self.a_update_epochs):
             acts_prob = self.actor(buffer_s)
             ratio = acts_prob.gather(1, buffer_a) / old_acts_prob.gather(1, buffer_a)
