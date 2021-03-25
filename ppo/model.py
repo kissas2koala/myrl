@@ -27,8 +27,10 @@ class Critic(nn.Module):
 
 
 class Actor(nn.Module):
-    def __init__(self, dim_obs, dim_action, hidden_size):
+    def __init__(self, dim_obs, dim_action, hidden_size, is_continuous=False):
         super(Actor, self).__init__()
+        self.is_continuous = is_continuous
+
         self.linear_1 = nn.Linear(dim_obs, hidden_size)
         self.linear_2 = nn.Linear(hidden_size, hidden_size)
         self.linear_3 = nn.Linear(hidden_size, dim_action)
@@ -41,5 +43,11 @@ class Actor(nn.Module):
     def forward(self, obs):
         x = F.tanh(self.linear_1(obs))
         x = F.tanh(self.linear_2(x))
-        out = F.softmax(self.linear_3(x), dim=1)
+        # 判断上是否为连续动作
+        if self.is_continuous:
+            mu = F.tanh(self.linear_3(x))
+            sigma = F.softplus(self.linear_3(x))
+            out = (mu, sigma)
+        else:
+            out = F.softmax(self.linear_3(x), dim=1)
         return out

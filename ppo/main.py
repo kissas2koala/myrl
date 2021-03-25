@@ -12,7 +12,11 @@ from utils import file_w
 
 def get_params():
     parser = argparse.ArgumentParser()
+    parser.add_argument("--is_continuous", default=True, type=bool)  # 是否为连续型动作
     parser.add_argument("--train", default=1, type=int)  # 1 表示训练，0表示只进行eval
+    parser.add_argument("--max_eps", default=800, type=int)  # 训练的最大episode数目
+    parser.add_argument("--max_steps", default=200, type=int)
+
     parser.add_argument("--gamma", default=0.99, type=float)
     parser.add_argument("--clip_epsilon", default=0.2, type=float)
     parser.add_argument("--a_update_epochs", default=5, type=int)
@@ -23,8 +27,6 @@ def get_params():
     parser.add_argument("--actor_lr", default=1e-4, type=float)
     parser.add_argument("--hidden_size", default=64, type=int)
 
-    parser.add_argument("--max_eps", default=800, type=int)  # 训练的最大episode数目
-    parser.add_argument("--max_steps", default=200, type=int)
     params = parser.parse_args()
 
     return params
@@ -37,12 +39,17 @@ def main(params):
     env.seed(1)
     n_states = env.observation_space.shape[0]  # (4, )
     n_actions = env.action_space.n  # 2
+    if params.is_continuous:
+        act_bound = [env.action_space.low, env.action_space.high]
     logger.info("obs num: %d" % n_states)
     logger.info("act num: %d" % n_actions)
+    if params.is_continuous:
+        logger.info("act low: {}, high: {}".format(act_bound[0], act_bound[1]))
 
     RL = PPO(dim_obs=n_states, dim_act=n_actions, actor_lr=params.actor_lr, critic_lr=params.critic_lr,
              gamma=params.gamma, clip_epsilon=params.clip_epsilon, a_update_epochs=params.a_update_epochs,
-             c_update_epochs=params.c_update_epochs, hidden_size=params.hidden_size, buffer_size=params.buffer_size)
+             c_update_epochs=params.c_update_epochs, hidden_size=params.hidden_size, buffer_size=params.buffer_size,
+             is_continuous=params.is_continuous)
 
     # execution
     total_rewards = []

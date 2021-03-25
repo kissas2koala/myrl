@@ -19,17 +19,17 @@ class Logger(object):
 
     def info(self, *args):
         if self.level < 2:
-            print(args)
+            print(', '.join([str(ele) for ele in args]))
 
     def debug(self, *args):
         if self.level < 1:
             # msg = msg if msg else 'wait!'
-            print(args)
+            print(', '.join([str(ele) for ele in args]))
             # input('pause: input sth and enter: ')
 
     def warn(self, *args):
         if self.level < 3:
-            print(args)
+            print(', '.join([str(ele) for ele in args]))
 
     def wait(self):
         input('wait! pause: input sth and enter: ')
@@ -42,13 +42,14 @@ class GPUConfig(object):
         self.use_parallel = False
         self.device_ids = [0]
         if self.use_cuda:
-            pass
             # 分配gpu
             # th.cuda.set_device(1)
             self.device = th.device("cuda:0")  # 指定模型训练所在 GPU
             if self.use_parallel:
                 th.distributed.init_process_group(backend='nccl')
-                # python -m torch.distributed.launch main.py
+                # 需要用此命令运行 python -m torch.distributed.launch main.py
+        else:
+            self.device = 'cpu'
 
 
 # 日志单例
